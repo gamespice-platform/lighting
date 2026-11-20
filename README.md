@@ -1,3 +1,5 @@
+[![dot-lighting - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/251-dot-lighting)
+
 Lighting as data. A world's sun, ambient light, fog, sky and glow live in a dictionary that a map file, a downloaded pack, a server config or an editor can supply, and one call turns it into Godot nodes sized for the machine it runs on.
 
 Part of the [**Gamespice**](https://gamespice.net) collection: modular, MIT-licensed building blocks for games on the Gamespice platform (only the TMC website back end is closed). It was built with Claude Code and its headless suite passes, but little of it has met real players yet, so expect rough edges and please report what you find.
