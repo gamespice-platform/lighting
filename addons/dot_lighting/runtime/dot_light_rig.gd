@@ -220,7 +220,7 @@ static func _sky(doc: DotLightDocument, horizon: Color, below_horizon: bool = fa
 
 
 ## The family's one unit boundary: 0.75 inch per unit. Duplicated rather than imported, as
-## the addon depends on dot-core alone.
+## the addon depends on GameSpice Core alone.
 const METRES_PER_UNIT := 0.01905
 
 

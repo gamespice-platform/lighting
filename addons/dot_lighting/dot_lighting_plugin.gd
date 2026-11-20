@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-## Editor entry point for dot-lighting. Registers inspector types, and with
+## Editor entry point for GameSpice Lighting. Registers inspector types, and with
 ## `--dot-bake-lightmaps=` on the command line bakes a directory of bake scenes and quits
 ## ([DotLightBake]); without it, nothing else. A game that bakes keeps it enabled in
 ## project.godot: the editor reads [editor_plugins] from there alone, not from override.cfg.

@@ -1,10 +1,10 @@
-# dot-lighting
+# GameSpice Lighting
 
 A world's lighting as a document rather than as a scene: `DotLightDocument` is a dictionary in and a dictionary out (sun, ambient, fog, sky, baked-light count), `DotLightRig` turns one into a sun and an `Environment`, and `DotLightProfile` says how much of it this machine draws. An imported map carries its lighting in its manifest and the game applies it; game-airdrift applies imported maps' lighting this way, and game-fatal-contact gives each built-in map a document of its own.
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first.
 
-**The distributable is `addons/dot_lighting/`.** It requires [dot-core](../dot-core) and nothing else (`ln -s ../../dot-core/addons/dot_core addons/dot_core`, gitignored).
+**The distributable is `addons/dot_lighting/`.** It requires [GameSpice Core](../dot-core) and nothing else (`ln -s ../../dot-core/addons/dot_core addons/dot_core`, gitignored).
 
 ## Layout
 
@@ -35,7 +35,7 @@ The family's two steps ([family CLAUDE.md](../../CLAUDE.md#validating-anything))
 - **The document is the point.** Lighting built into a `.tscn` can only ship with the build; a dictionary lets a converted map carry its own, with nothing in between knowing about either end.
 - **Absent is not zero.** `has_sun` and `has_ambient` tell "the map said nothing" from "the map said black". Those are different instructions and the suite asserts both.
 - **The document and the profile stay separate.** The document is the same on every machine; the profile differs between a desktop and a browser. Folding them together makes a map look different because somebody turned their settings down. Tone mapping is on at every tier.
-- **`METRES_PER_UNIT` (0.01905) is duplicated on purpose.** The same figure lives in game-airdrift's `airdrift_units.gd` and game-fatal-contact's `fc_bsp_map.gd`. The one-place rule is per project; this addon depends on dot-core alone, and importing a game's unit class to read a fog distance would be a dependency on the game. A caller with its own conversion passes metres in.
+- **`METRES_PER_UNIT` (0.01905) is duplicated on purpose.** The same figure lives in game-airdrift's `airdrift_units.gd` and game-fatal-contact's `fc_bsp_map.gd`. The one-place rule is per project; this addon depends on GameSpice Core alone, and importing a game's unit class to read a fog distance would be a dependency on the game. A caller with its own conversion passes metres in.
 - **The sun does not light a baked world's surfaces.** They are unshaded (the lightmap is their lighting), so the sun lights characters and props and the post-processing changes the world. "The sun does not seem to do anything" on a baked map is working as intended.
 - **`sky_name` is carried, never drawn.** It names a texture set inside the game the world was authored for, which is not ours to copy. The rig draws a procedural sky from the world's own numbers instead: fog colour as the horizon, ambient as the top, the sun at its own angle.
 - **`sky_top` is optional and absent draws the old sky exactly.** A converted world's ambient was measured from its sky, so the zenith in the ambient colour is right there; a world whose ambient was chosen for the shade names its zenith as a top-level `"sky_top": [r, g, b]`, and only what is drawn changes, never the ambient light. A malformed value is absent, not a default colour. The suite's `sky_top` section asserts both halves.

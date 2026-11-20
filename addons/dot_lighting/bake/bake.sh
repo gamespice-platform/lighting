@@ -6,7 +6,7 @@
 #
 # The scenes come from the game (DotLightBake.prepare puts a LightmapGI and the output path in
 # each); this opens the project in the editor under a virtual display with Forward+ on Vulkan
-# (the Compatibility renderer cannot bake) and lets dot-lighting's editor plugin bake each one
+# (the Compatibility renderer cannot bake) and lets GameSpice Lighting's editor plugin bake each one
 # and write the shipped file (editor/dot_light_bake_runner.gd). Prints the runner's DOT_BAKE
 # lines; exits non-zero if any scene did not bake.
 #

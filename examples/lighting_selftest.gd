@@ -1,6 +1,6 @@
 extends Node3D
 
-## dot-lighting's headless suite.
+## GameSpice Lighting's headless suite.
 ##
 ##     godot --headless --path . res://examples/lighting_selftest.tscn
 ##

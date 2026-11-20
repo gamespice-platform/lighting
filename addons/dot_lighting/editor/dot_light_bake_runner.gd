@@ -2,7 +2,7 @@
 extends Node
 
 ## Bakes every bake scene in one directory, unattended, then quits the editor. Started by
-## dot-lighting's editor plugin when the editor is launched with
+## GameSpice Lighting's editor plugin when the editor is launched with
 ## `-- --dot-bake-lightmaps=res://<dir>` (`bake/bake.sh` does that); inert otherwise.
 ##
 ## `LightmapGI.bake` is not bound for scripts in 4.7, so this opens each scene, presses the
