@@ -17,7 +17,7 @@ extends RefCounted
 # 4: GSContactShade (box, node, mesh, material, build): a multiplied contact shade where
 #    boxes meet, the fake ambient occlusion for the Compatibility renderer.
 # 5: GSLightBake (fingerprint, can_draw, attach, prepare, store) and GSLightmapSheet: baked
-#    light for a world built in code, and the editor bake runner behind --dot-bake-lightmaps.
+#    light for a world built in code, and the editor bake runner behind --gs-bake-lightmaps.
 # 6: GSLightRig.apply_fog(env, doc, metres_per_unit): the fog half of environment(), for a system
 #    (weather) that changes the fog of a world that is already running.
 # 7: GSLightBake.components, first_difference and scan; attach and prepare take the parts, so a stale

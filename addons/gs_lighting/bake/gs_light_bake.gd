@@ -23,17 +23,17 @@ extends RefCounted
 ## embeds the EXR's pixels as RGB9E5, zstd-compressed. Never on a server: [method attach] refuses
 ## with `CODE_UNSUPPORTED`. `BAKE_STATIC` lights are baked whole; `BAKE_DYNAMIC` give bounce and stay live.
 
-const CHANNEL := "dot.lighting.bake"
+const CHANNEL := "gs.lighting.bake"
 
 ## Bump when what a bake means changes (its settings, which lights are baked): every
 ## fingerprint includes it, so old files are refused as stale rather than drawn wrong.
 const VERSION := 2
 
 ## Where a bake scene says what it was built from and where its output goes.
-const META_FINGERPRINT := &"dot_light_fingerprint"
-const META_OUT := &"dot_light_out"
+const META_FINGERPRINT := &"gs_light_fingerprint"
+const META_OUT := &"gs_light_out"
 ## Per-component hashes (name to sha256) beside the fingerprint, so a stale bake can say which part moved.
-const META_COMPONENTS := &"dot_light_components"
+const META_COMPONENTS := &"gs_light_components"
 
 ## Top-level parts [method fingerprint] leaves out: the sky and fog are drawn live, props and
 ## dynamic nodes move. A bake only depends on static lights and static geometry.

@@ -21,7 +21,7 @@ var _failures := PackedStringArray()
 
 
 func _ready() -> void:
-	print("dot-lighting")
+	print("gs-lighting")
 	print("")
 	_document()
 	_round_trip()

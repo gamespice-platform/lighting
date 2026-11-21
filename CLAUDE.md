@@ -4,26 +4,26 @@ A world's lighting as a document rather than as a scene: `GSLightDocument` is a 
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first.
 
-**The distributable is `addons/dot_lighting/`.** It requires [GameSpice Core](../dot-core) and nothing else (`ln -s ../../dot-core/addons/dot_core addons/dot_core`, gitignored).
+**The distributable is `addons/gs_lighting/`.** It requires [GameSpice Core](../gs-core) and nothing else (`ln -s ../../gs-core/addons/gs_core addons/gs_core`, gitignored).
 
 ## Layout
 
 | Path | What |
 | --- | --- |
-| `core/dot_light_document.gd` | `GSLightDocument`: what the world is; `from_dictionary`, `to_dictionary`, `has_sun`, `has_ambient`, `sky_name`, `sky_top`/`has_sky_top`, `baked_light_count` |
-| `core/dot_light_profile.gd` | `GSLightProfile`: what this machine draws (tonemap, exposure, grade, fill, glow, fog, sky, shadows, occlusion); `high()`, `low()`, `web()`, `for_platform()` (low on a phone, web in a browser, else high) for baked worlds, `painted()` for hand-built ones; `is_compatibility()` |
-| `runtime/dot_light_rig.gd` | `GSLightRig`: `apply`, `environment`, `apply_fog` (the fog half, onto an existing Environment, for weather; API 6), `fill`, the procedural sky, `METRES_PER_UNIT` and `metres()` |
-| `runtime/dot_contact_shade.gd` | `GSContactShade`: fake ambient occlusion for a world of boxes; `box`, `node`, `mesh`, `material`, `build` |
-| `runtime/dot_lamp_flicker.gd` | `GSLampFlicker`: `scale(seed, time, amount, allow_flashes)`, a failing lamp's brightness as a pure function of time (API 9) |
-| `runtime/dot_light_zone.gd` | `GSLightZone`: the inspector half for a hand-built world; builds the lighting on `_ready` and steps aside |
-| `bake/dot_light_bake.gd` | `GSLightBake`: baked light for a world built in code; `fingerprint`, `attach` (runtime: refuses headless, a missing file at DEBUG, a stale one with a WARN), `prepare` and `store` (offline) |
-| `bake/dot_lightmap_sheet.gd` | `GSLightmapSheet`: deterministic UV2 for meshes of flat quads (the shelf packer); `face`, `pack`, `commit`, `size` |
-| `bake/bake.sh` | bakes a directory of bake scenes in the editor under xvfb, Forward+ on Vulkan; prints `DOT_BAKE` lines |
-| `editor/dot_light_bake_runner.gd` | what the plugin starts under `--dot-bake-lightmaps=`: opens each scene, presses the editor's bake button, answers its file dialog, calls `store` |
-| `dot_lighting_api.gd` | the API level (`GSAddonApi`); bump `LEVEL` for anything a game could newly call, with a comment line saying what |
+| `core/gs_light_document.gd` | `GSLightDocument`: what the world is; `from_dictionary`, `to_dictionary`, `has_sun`, `has_ambient`, `sky_name`, `sky_top`/`has_sky_top`, `baked_light_count` |
+| `core/gs_light_profile.gd` | `GSLightProfile`: what this machine draws (tonemap, exposure, grade, fill, glow, fog, sky, shadows, occlusion); `high()`, `low()`, `web()`, `for_platform()` (low on a phone, web in a browser, else high) for baked worlds, `painted()` for hand-built ones; `is_compatibility()` |
+| `runtime/gs_light_rig.gd` | `GSLightRig`: `apply`, `environment`, `apply_fog` (the fog half, onto an existing Environment, for weather; API 6), `fill`, the procedural sky, `METRES_PER_UNIT` and `metres()` |
+| `runtime/gs_contact_shade.gd` | `GSContactShade`: fake ambient occlusion for a world of boxes; `box`, `node`, `mesh`, `material`, `build` |
+| `runtime/gs_lamp_flicker.gd` | `GSLampFlicker`: `scale(seed, time, amount, allow_flashes)`, a failing lamp's brightness as a pure function of time (API 9) |
+| `runtime/gs_light_zone.gd` | `GSLightZone`: the inspector half for a hand-built world; builds the lighting on `_ready` and steps aside |
+| `bake/gs_light_bake.gd` | `GSLightBake`: baked light for a world built in code; `fingerprint`, `attach` (runtime: refuses headless, a missing file at DEBUG, a stale one with a WARN), `prepare` and `store` (offline) |
+| `bake/gs_lightmap_sheet.gd` | `GSLightmapSheet`: deterministic UV2 for meshes of flat quads (the shelf packer); `face`, `pack`, `commit`, `size` |
+| `bake/bake.sh` | bakes a directory of bake scenes in the editor under xvfb, Forward+ on Vulkan; prints `GS_BAKE` lines |
+| `editor/gs_light_bake_runner.gd` | what the plugin starts under `--gs-bake-lightmaps=`: opens each scene, presses the editor's bake button, answers its file dialog, calls `store` |
+| `gs_lighting_api.gd` | the API level (`GSAddonApi`); bump `LEVEL` for anything a game could newly call, with a comment line saying what |
 | `examples/lighting_selftest.tscn` | the suite |
 
-Paths except `examples/` are in `addons/dot_lighting/`.
+Paths except `examples/` are in `addons/gs_lighting/`.
 
 ## Running and testing
 
@@ -31,7 +31,7 @@ The family's two steps ([family CLAUDE.md](../../CLAUDE.md#validating-anything))
 
 ## Rules, and why
 
-- **Not part of dot-fx.** dot-fx's invariant is "safe to drop", and lighting fails it: a world whose glow got budgeted out is the wrong world, and a player judging a surface's speed by how fast its pattern goes past is reading something lighting decides the legibility of. An effect is an event; lighting is continuous world state. It is not dot-effects either (status effects, which are simulation; this cannot touch the simulation).
+- **Not part of gs-fx.** gs-fx's invariant is "safe to drop", and lighting fails it: a world whose glow got budgeted out is the wrong world, and a player judging a surface's speed by how fast its pattern goes past is reading something lighting decides the legibility of. An effect is an event; lighting is continuous world state. It is not gs-effects either (status effects, which are simulation; this cannot touch the simulation).
 - **The document is the point.** Lighting built into a `.tscn` can only ship with the build; a dictionary lets a converted map carry its own, with nothing in between knowing about either end.
 - **Absent is not zero.** `has_sun` and `has_ambient` tell "the map said nothing" from "the map said black". Those are different instructions and the suite asserts both.
 - **The document and the profile stay separate.** The document is the same on every machine; the profile differs between a desktop and a browser. Folding them together makes a map look different because somebody turned their settings down. Tone mapping is on at every tier.

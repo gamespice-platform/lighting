@@ -2,26 +2,26 @@
 extends EditorPlugin
 
 ## Editor entry point for GameSpice Lighting. Registers inspector types, and with
-## `--dot-bake-lightmaps=` on the command line bakes a directory of bake scenes and quits
+## `--gs-bake-lightmaps=` on the command line bakes a directory of bake scenes and quits
 ## ([GSLightBake]); without it, nothing else. A game that bakes keeps it enabled in
 ## project.godot: the editor reads [editor_plugins] from there alone, not from override.cfg.
 ##
 ## No autoloads: a server and a client in one process, or two worlds mid-load, need two rigs.
 
-const _ICON := "res://addons/dot_lighting/icon_placeholder.svg"
+const _ICON := "res://addons/gs_lighting/icon_placeholder.svg"
 
 const _TYPES := [
 	[
 		"GSLightZone",
 		"Node3D",
-		"res://addons/dot_lighting/runtime/dot_light_zone.gd",
+		"res://addons/gs_lighting/runtime/gs_light_zone.gd",
 	],
 ]
 
 
-## `godot --editor --path <project> -- --dot-bake-lightmaps=res://<dir>` bakes every scene in
-## that directory and quits (editor/dot_light_bake_runner.gd; bake/bake.sh runs it).
-const BAKE_ARG := "--dot-bake-lightmaps="
+## `godot --editor --path <project> -- --gs-bake-lightmaps=res://<dir>` bakes every scene in
+## that directory and quits (editor/gs_light_bake_runner.gd; bake/bake.sh runs it).
+const BAKE_ARG := "--gs-bake-lightmaps="
 
 var _baker: Node = null
 
@@ -29,7 +29,7 @@ var _baker: Node = null
 func _enter_tree() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with(BAKE_ARG):
-			_baker = (load("res://addons/dot_lighting/editor/dot_light_bake_runner.gd") as GDScript).new()
+			_baker = (load("res://addons/gs_lighting/editor/gs_light_bake_runner.gd") as GDScript).new()
 			_baker.set("directory", arg.trim_prefix(BAKE_ARG))
 			add_child(_baker)
 

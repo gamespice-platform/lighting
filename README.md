@@ -6,7 +6,7 @@ Part of the [**GameSpice**](https://gamespice.net) collection: modular, MIT-lice
 
 ## Install
 
-Copy `addons/dot_lighting/` and [GameSpice Core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable dot-lighting in **Project > Project Settings > Plugins**. There are no autoloads: a rig belongs to a world, so a process can hold two.
+Copy `addons/gs_lighting/` and [GameSpice Core](https://github.com/gamespice-platform/core)'s `addons/gs_core/` into your project and enable gs-lighting in **Project > Project Settings > Plugins**. There are no autoloads: a rig belongs to a world, so a process can hold two.
 
 ## Use
 
@@ -85,10 +85,10 @@ The sky's top is the ambient colour unless the document has `"sky_top": [r, g, b
 A map built from a document at load time has nothing for the editor to bake. `GSLightBake.prepare` copies the drawn meshes into a scene with a `LightmapGI`, and the editor bakes it:
 
 ```bash
-addons/dot_lighting/bake/bake.sh <project> res://<dir>
+addons/gs_lighting/bake/bake.sh <project> res://<dir>
 ```
 
-The plugin must be enabled in `project.godot` (it does nothing without `--dot-bake-lightmaps=`). Baking needs Vulkan: a real GPU takes seconds per map, software rendering takes many minutes. The result is one `LightmapGIData` per map. At runtime the client rebuilds the same meshes (same names, same second UV set from `GSLightmapSheet`) and attaches it:
+The plugin must be enabled in `project.godot` (it does nothing without `--gs-bake-lightmaps=`). Baking needs Vulkan: a real GPU takes seconds per map, software rendering takes many minutes. The result is one `LightmapGIData` per map. At runtime the client rebuilds the same meshes (same names, same second UV set from `GSLightmapSheet`) and attaches it:
 
 ```gdscript
 var res := GSLightBake.attach(map_node, "res://lightmaps/%s.res" % id, GSLightBake.fingerprint(my_document_parts))

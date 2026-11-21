@@ -3,11 +3,11 @@ extends Node
 
 ## Bakes every bake scene in one directory, unattended, then quits the editor. Started by
 ## GameSpice Lighting's editor plugin when the editor is launched with
-## `-- --dot-bake-lightmaps=res://<dir>` (`bake/bake.sh` does that); inert otherwise.
+## `-- --gs-bake-lightmaps=res://<dir>` (`bake/bake.sh` does that); inert otherwise.
 ##
 ## `LightmapGI.bake` is not bound for scripts in 4.7, so this opens each scene, presses the
 ## editor's "Bake Lightmaps" button, answers its file dialog with `<scene>.lmbake`, then calls
-## [method GSLightBake.store]. Output is `DOT_BAKE ok|fail ...` lines for bake.sh.
+## [method GSLightBake.store]. Output is `GS_BAKE ok|fail ...` lines for bake.sh.
 
 const BUTTON_TEXT := "Bake Lightmaps"
 
@@ -28,15 +28,15 @@ func _run() -> void:
 		if file.get_extension() == "tscn":
 			scenes.append(directory.path_join(file))
 
-	print("DOT_BAKE start %d scenes in %s" % [scenes.size(), directory])
+	print("GS_BAKE start %d scenes in %s" % [scenes.size(), directory])
 
 	for scene in scenes:
 		var why := await _bake(scene)
 		if why != "":
 			failed += 1
-			print("DOT_BAKE fail %s %s" % [scene, why])
+			print("GS_BAKE fail %s %s" % [scene, why])
 
-	print("DOT_BAKE end %d of %d baked" % [scenes.size() - failed, scenes.size()])
+	print("GS_BAKE end %d of %d baked" % [scenes.size() - failed, scenes.size()])
 	get_tree().quit(1 if failed > 0 else 0)
 
 
@@ -85,7 +85,7 @@ func _bake(scene: String) -> String:
 		return "baked but not stored: %s" % stored.error.message
 
 	var info: Dictionary = stored.value
-	print("DOT_BAKE ok %s %d %d %s %dx%dx%d" % [scene, ms, int(info["bytes"]), info["path"],
+	print("GS_BAKE ok %s %d %d %s %dx%dx%d" % [scene, ms, int(info["bytes"]), info["path"],
 		(info["size"] as Vector2i).x, (info["size"] as Vector2i).y, int(info["layers"])])
 	return ""
 
