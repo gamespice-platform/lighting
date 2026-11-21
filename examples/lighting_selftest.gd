@@ -69,13 +69,13 @@ func _check(ok: bool, what: String) -> void:
 func _document() -> void:
 	_section("the document")
 
-	var empty := DotLightDocument.from_dictionary({})
+	var empty := GSLightDocument.from_dictionary({})
 	_check(not empty.has_sun, "an empty document declares no sun")
 	_check(not empty.fog_enabled, "and no fog")
 	_check(empty.sun_colour == Color.WHITE, "and its sun colour is white rather than black")
 	_check(empty.baked_light_count == 0, "and it knows of no baked lights")
 
-	var doc := DotLightDocument.from_dictionary({
+	var doc := GSLightDocument.from_dictionary({
 		"sun": {
 			"pitch_src": -28.0, "yaw_src": 270.0,
 			"colour": [0.92, 0.87, 0.69], "brightness": 600.0,
@@ -97,9 +97,9 @@ func _document() -> void:
 
 	# [b]Absent is not zero, and this is the check that says so.[/b] A document with no
 	# ambient keeps the consumer's default; one with a black ambient means black.
-	var no_ambient := DotLightDocument.from_dictionary({"sun": {"pitch_src": -45.0}})
+	var no_ambient := GSLightDocument.from_dictionary({"sun": {"pitch_src": -45.0}})
 	_check(not no_ambient.has_ambient, "a sun with no ambient does not claim one")
-	var black := DotLightDocument.from_dictionary(
+	var black := GSLightDocument.from_dictionary(
 		{"sun": {"pitch_src": -45.0, "ambient_colour": [0.0, 0.0, 0.0]}})
 	_check(black.has_ambient and black.ambient_colour == Color.BLACK,
 		"and one that says black means black, which is a different instruction")
@@ -109,7 +109,7 @@ func _document() -> void:
 func _round_trip() -> void:
 	_section("it survives being written down")
 
-	var before := DotLightDocument.from_dictionary({
+	var before := GSLightDocument.from_dictionary({
 		"sun": {"pitch_src": -69.0, "yaw_src": 111.0, "colour": [0.97, 0.91, 0.83],
 			"brightness": 32.0, "spread_degrees": 12.0},
 		"fog": {"enabled": true, "colour": [0.09, 0.66, 0.86], "start": 0.0, "end": 8536.0,
@@ -117,7 +117,7 @@ func _round_trip() -> void:
 		"sky_name": "reef",
 		"baked_light_count": 74,
 	})
-	var after := DotLightDocument.from_dictionary(before.to_dictionary())
+	var after := GSLightDocument.from_dictionary(before.to_dictionary())
 
 	_check(is_equal_approx(after.sun_pitch, before.sun_pitch), "the pitch comes back")
 	_check(is_equal_approx(after.sun_yaw, before.sun_yaw), "and the yaw")
@@ -132,7 +132,7 @@ func _round_trip() -> void:
 	# A JSON round trip as well, because the whole point of a document is that it travels.
 	var text := JSON.stringify(before.to_dictionary())
 	var parsed: Variant = JSON.parse_string(text)
-	var via_json := DotLightDocument.from_dictionary(parsed as Dictionary)
+	var via_json := GSLightDocument.from_dictionary(parsed as Dictionary)
 	_check(is_equal_approx(via_json.sun_pitch, -69.0), "and through JSON as well")
 	_done()
 
@@ -141,7 +141,7 @@ func _sun_direction() -> void:
 	_section("the sun points where the world says")
 
 	# Source is Z-up; -90 is straight down whatever the yaw.
-	var down := DotLightRig.sun_rotation(-90.0, 0.0)
+	var down := GSLightRig.sun_rotation(-90.0, 0.0)
 	var basis := Basis.from_euler(down)
 	var direction := -basis.z
 	_check(direction.y < -0.99,
@@ -153,18 +153,18 @@ func _sun_direction() -> void:
 	_check(is_finite(down.x) and is_finite(down.y) and is_finite(down.z),
 		"and the rotation is a number rather than a NaN")
 
-	var level := DotLightRig.sun_rotation(0.0, 0.0)
+	var level := GSLightRig.sun_rotation(0.0, 0.0)
 	var level_dir := -Basis.from_euler(level).z
 	_check(absf(level_dir.y) < 0.01, "a pitch of 0 is a sun on the horizon")
 
 	# Yaw has to move the sun AROUND rather than tilt it, and the two yaws below are
 	# opposite, so their directions must be too.
-	var east := -Basis.from_euler(DotLightRig.sun_rotation(-30.0, 0.0)).z
-	var west := -Basis.from_euler(DotLightRig.sun_rotation(-30.0, 180.0)).z
+	var east := -Basis.from_euler(GSLightRig.sun_rotation(-30.0, 0.0)).z
+	var west := -Basis.from_euler(GSLightRig.sun_rotation(-30.0, 180.0)).z
 	_check(absf(east.y - west.y) < 0.01, "opposite yaws keep the same height")
 	_check(east.dot(west) < 0.0, "and point opposite ways")
 
-	var aimed := DotLightRig.aim_along(Vector3.ZERO)
+	var aimed := GSLightRig.aim_along(Vector3.ZERO)
 	_check(is_finite(aimed.x), "and a zero direction does not produce a NaN either")
 	_done()
 
@@ -172,9 +172,9 @@ func _sun_direction() -> void:
 func _profiles() -> void:
 	_section("a profile is what THIS machine draws")
 
-	var high := DotLightProfile.high()
-	var low := DotLightProfile.low()
-	var web := DotLightProfile.web()
+	var high := GSLightProfile.high()
+	var low := GSLightProfile.low()
+	var web := GSLightProfile.web()
 
 	_check(high.glow and high.sun_shadows, "high draws everything")
 	_check(not low.glow and not low.sun_shadows, "low drops glow and shadows")
@@ -185,13 +185,13 @@ func _profiles() -> void:
 	# scales with how much geometry is in frame; glow is a fixed cost in screen pixels.
 	_check(web.glow and not web.sun_shadows,
 		"web keeps glow and drops shadows, which is the expensive one there")
-	var here := DotLightProfile.for_platform()
-	var expect := DotLightProfile.web() if OS.has_feature("web") else DotLightProfile.high()
-	if DotPlatform.is_mobile():
-		expect = DotLightProfile.low()
+	var here := GSLightProfile.for_platform()
+	var expect := GSLightProfile.web() if OS.has_feature("web") else GSLightProfile.high()
+	if GSPlatform.is_mobile():
+		expect = GSLightProfile.low()
 	_check(here.glow == expect.glow and here.sun_shadows == expect.sun_shadows,
 		"for_platform picks this machine's stock profile")
-	_check(not DotLightProfile.low().glow and DotLightProfile.low().sun_shadows == false,
+	_check(not GSLightProfile.low().glow and GSLightProfile.low().sun_shadows == false,
 		"and a phone's profile (low) draws neither glow nor shadows")
 	_done()
 
@@ -199,7 +199,7 @@ func _profiles() -> void:
 func _rig() -> void:
 	_section("the rig builds a sun and an environment")
 
-	var doc := DotLightDocument.from_dictionary({
+	var doc := GSLightDocument.from_dictionary({
 		"sun": {"pitch_src": -28.0, "yaw_src": 270.0, "colour": [0.92, 0.87, 0.69],
 			"brightness": 600.0, "ambient_colour": [0.49, 0.57, 0.67]},
 		"fog": {"enabled": true, "colour": [0.61, 0.93, 0.98],
@@ -208,7 +208,7 @@ func _rig() -> void:
 
 	var root := Node3D.new()
 	add_child(root)
-	var sun := DotLightRig.apply(root, doc)
+	var sun := GSLightRig.apply(root, doc)
 
 	_check(sun != null, "it returns the sun it made")
 	_check(sun.light_color.is_equal_approx(Color(0.92, 0.87, 0.69)),
@@ -232,15 +232,15 @@ func _rig() -> void:
 	# apply_fog is what environment() now calls; applying it again to a bare Environment in
 	# metres (as weather does) must write the same fields, and off must switch fog off.
 	var bare := Environment.new()
-	var metre_doc := DotLightDocument.from_dictionary({"fog": {"enabled": true,
+	var metre_doc := GSLightDocument.from_dictionary({"fog": {"enabled": true,
 		"colour": [0.5, 0.6, 0.7], "start": 5.0, "end": 90.0, "max_density": 0.4}})
-	DotLightRig.apply_fog(bare, metre_doc, 1.0)
+	GSLightRig.apply_fog(bare, metre_doc, 1.0)
 	_check(bare.fog_enabled and is_equal_approx(bare.fog_depth_end, 90.0)
 		and is_equal_approx(bare.fog_density, 0.4) and bare.fog_light_color.is_equal_approx(Color(0.5, 0.6, 0.7)),
 		"apply_fog writes a bare Environment in metres: colour, depth and the document's own density")
-	DotLightRig.apply_fog(bare, DotLightDocument.new(), 1.0)
+	GSLightRig.apply_fog(bare, GSLightDocument.new(), 1.0)
 	_check(not bare.fog_enabled, "and a document with no fog switches it off")
-	_check(is_equal_approx(env.fog_depth_end, DotLightRig.metres(20000.0)),
+	_check(is_equal_approx(env.fog_depth_end, GSLightRig.metres(20000.0)),
 		"while environment() still converts map units (%.1f m)" % env.fog_depth_end)
 	# The same invariant the flat background used to carry, moved to where the horizon
 	# now is. A sky whose horizon is not the colour the fog fades into draws a visible
@@ -256,9 +256,9 @@ func _rig() -> void:
 
 	# A negative start means "from the camera" in a source world and is not the same
 	# statement as a negative depth here.
-	var negative := DotLightDocument.from_dictionary(
+	var negative := GSLightDocument.from_dictionary(
 		{"fog": {"enabled": true, "start": -300.0, "end": 8536.0}})
-	var neg_node := DotLightRig.environment(negative)
+	var neg_node := GSLightRig.environment(negative)
 	_check(neg_node.environment.fog_depth_begin >= 0.0,
 		"a negative fog start is clamped rather than passed on")
 	neg_node.free()
@@ -266,15 +266,15 @@ func _rig() -> void:
 	# An enclosed level keeps a dark ground; a world floating in its sky does not.
 	_check(sky_mat != null and sky_mat.ground_bottom_color.get_luminance() < sky_mat.sky_horizon_color.get_luminance(),
 		"by default the sky's lower half is dark ground, for a level with a floor under its horizon")
-	var floating := DotLightProfile.high()
+	var floating := GSLightProfile.high()
 	floating.sky_below_horizon = true
-	var float_node := DotLightRig.environment(doc, floating)
+	var float_node := GSLightRig.environment(doc, floating)
 	var float_sky := float_node.environment.sky.sky_material as ProceduralSkyMaterial
 	_check(float_sky != null and float_sky.ground_bottom_color.is_equal_approx(float_sky.sky_top_color),
 		"and with sky_below_horizon the lower half mirrors the upper, for a world inside its skybox")
 	float_node.free()
 
-	var low_node := DotLightRig.environment(doc, DotLightProfile.low())
+	var low_node := GSLightRig.environment(doc, GSLightProfile.low())
 	var low_env := low_node.environment
 	_check(not low_env.glow_enabled, "a low profile turns the glow off")
 	_check(low_env.tonemap_mode == Environment.TONE_MAPPER_FILMIC,
@@ -283,10 +283,10 @@ func _rig() -> void:
 
 	var spare := Node3D.new()
 	add_child(spare)
-	var empty_sun := DotLightRig.apply(spare, DotLightDocument.new())
+	var empty_sun := GSLightRig.apply(spare, GSLightDocument.new())
 	_check(empty_sun != null, "an empty document still produces a usable sun")
 	spare.queue_free()
-	_check(DotLightRig.apply(null, doc) == null, "and a null parent is refused rather than crashing")
+	_check(GSLightRig.apply(null, doc) == null, "and a null parent is refused rather than crashing")
 	_done()
 
 
@@ -303,13 +303,13 @@ func _sky_top() -> void:
 			"ambient_colour": [0.74, 0.78, 0.92]},
 		"fog": {"enabled": true, "colour": [0.80, 0.89, 1.0], "start": 2600.0, "end": 12000.0},
 	}
-	var plain := DotLightDocument.from_dictionary(base)
+	var plain := GSLightDocument.from_dictionary(base)
 	_check(not plain.has_sky_top, "a document without sky_top does not claim one")
 	_check(not plain.to_dictionary().has("sky_top"), "and does not write one back out")
-	var plain_sky := _sky_of(DotLightRig.environment(plain))
+	var plain_sky := _sky_of(GSLightRig.environment(plain))
 	_check(plain_sky != null and plain_sky.sky_top_color.is_equal_approx(Color(0.74, 0.78, 0.92)),
 		"and its zenith is still the ambient, exactly as before sky_top existed")
-	var dark := _sky_of(DotLightRig.environment(DotLightDocument.from_dictionary(
+	var dark := _sky_of(GSLightRig.environment(GSLightDocument.from_dictionary(
 		{"fog": {"enabled": true, "colour": [0.80, 0.89, 1.0], "end": 12000.0}})))
 	_check(dark != null and dark.sky_top_color.is_equal_approx(Color(0.80, 0.89, 1.0).darkened(0.3)),
 		"and with no ambient either, still the darker horizon")
@@ -317,11 +317,11 @@ func _sky_top() -> void:
 	# The shape game-fatal-contact's maps already carry: a top-level key beside sky_name.
 	var data := base.duplicate(true)
 	data["sky_top"] = [0.30, 0.56, 0.96]
-	var doc := DotLightDocument.from_dictionary(data)
+	var doc := GSLightDocument.from_dictionary(data)
 	var blue := Color(0.30, 0.56, 0.96)
 	_check(doc.has_sky_top and doc.sky_top.is_equal_approx(blue),
 		"a top-level \"sky_top\": [r, g, b] is read")
-	var env_node := DotLightRig.environment(doc)
+	var env_node := GSLightRig.environment(doc)
 	var env := env_node.environment
 	var sky := _sky_of(env_node)
 	_check(sky != null and sky.sky_top_color.is_equal_approx(blue), "and drawn as the zenith")
@@ -329,23 +329,23 @@ func _sky_top() -> void:
 		"while the ambient LIGHT stays the pale fill, which is the point of naming it apart")
 	_check(sky != null and sky.sky_horizon_color.is_equal_approx(env.fog_light_color),
 		"and the horizon is still the fog colour")
-	var floating := DotLightProfile.high()
+	var floating := GSLightProfile.high()
 	floating.sky_below_horizon = true
-	var under := _sky_of(DotLightRig.environment(doc, floating))
+	var under := _sky_of(GSLightRig.environment(doc, floating))
 	_check(under != null and under.ground_bottom_color.is_equal_approx(blue),
 		"and a world floating in its sky mirrors the sky_top underneath, not the ambient")
 
-	var back := DotLightDocument.from_dictionary(doc.to_dictionary())
+	var back := GSLightDocument.from_dictionary(doc.to_dictionary())
 	_check(back.has_sky_top and back.sky_top.is_equal_approx(blue), "it survives being written down")
-	var via_json := DotLightDocument.from_dictionary(
+	var via_json := GSLightDocument.from_dictionary(
 		JSON.parse_string(JSON.stringify(doc.to_dictionary())) as Dictionary)
 	_check(via_json.has_sky_top and via_json.sky_top.is_equal_approx(blue), "and through JSON")
 
 	# Absent is not zero here either: black is a colour, and a malformed value is absent.
-	var black := DotLightDocument.from_dictionary({"sky_top": [0.0, 0.0, 0.0]})
+	var black := GSLightDocument.from_dictionary({"sky_top": [0.0, 0.0, 0.0]})
 	_check(black.has_sky_top and black.sky_top == Color.BLACK, "a black sky_top means black")
-	var bad := DotLightDocument.from_dictionary({"sky_top": [0.3, 0.5]})
-	var bad_word := DotLightDocument.from_dictionary({"sky_top": "blue"})
+	var bad := GSLightDocument.from_dictionary({"sky_top": [0.3, 0.5]})
+	var bad_word := GSLightDocument.from_dictionary({"sky_top": "blue"})
 	_check(not bad.has_sky_top and not bad_word.has_sky_top,
 		"and a value that is not a colour is ignored rather than painted as a default")
 	_done()
@@ -371,29 +371,29 @@ func _sky_of(node: WorldEnvironment) -> ProceduralSkyMaterial:
 func _painted() -> void:
 	_section("painted: contrast for a world of flat colours")
 
-	for stock in [DotLightProfile.high(), DotLightProfile.web(), DotLightProfile.low()]:
-		var p := stock as DotLightProfile
+	for stock in [GSLightProfile.high(), GSLightProfile.web(), GSLightProfile.low()]:
+		var p := stock as GSLightProfile
 		_check(p.exposure == 1.0 and p.contrast == 1.0 and p.saturation == 1.0
 			and p.fill_energy == 0.0 and not p.ambient_occlusion,
 			"a stock profile leaves exposure, the grade, the fill and occlusion as they were")
 
-	var painted := DotLightProfile.painted()
-	_check(painted.tonemap and painted.tonemap_white > DotLightProfile.high().tonemap_white,
+	var painted := GSLightProfile.painted()
+	_check(painted.tonemap and painted.tonemap_white > GSLightProfile.high().tonemap_white,
 		"painted is tone mapped with a longer shoulder, so a pale floor lands grey and not white")
-	_check(painted.fill_energy > 0.0 and painted.ambient_energy < DotLightProfile.high().ambient_energy,
+	_check(painted.fill_energy > 0.0 and painted.ambient_energy < GSLightProfile.high().ambient_energy,
 		"and trades some of the flat ambient for a fill, so shade keeps its edges")
 	_check(painted.contrast > 1.0 and painted.saturation > 1.0, "with a little contrast and colour")
 	_check(painted.exposure < 1.0, "and an exposure under 1.0")
-	_check(painted.sun_shadows == DotLightProfile.high().sun_shadows or OS.has_feature("web"),
+	_check(painted.sun_shadows == GSLightProfile.high().sun_shadows or OS.has_feature("web"),
 		"on this platform's own tier")
 
-	var doc := DotLightDocument.from_dictionary({
+	var doc := GSLightDocument.from_dictionary({
 		"sun": {"pitch_src": -50.0, "yaw_src": -35.0, "brightness": 380.0,
 			"ambient_colour": [0.74, 0.78, 0.92]},
 	})
 	var root := Node3D.new()
 	add_child(root)
-	var sun := DotLightRig.apply(root, doc, painted)
+	var sun := GSLightRig.apply(root, doc, painted)
 	var fill: DirectionalLight3D = root.get_node_or_null("Fill")
 	var env_node: WorldEnvironment = null
 	for child in root.get_children():
@@ -422,7 +422,7 @@ func _painted() -> void:
 
 	var stock_root := Node3D.new()
 	add_child(stock_root)
-	DotLightRig.apply(stock_root, doc)
+	GSLightRig.apply(stock_root, doc)
 	var stock_env: Environment = null
 	for child in stock_root.get_children():
 		if child is WorldEnvironment:
@@ -433,7 +433,7 @@ func _painted() -> void:
 	stock_root.queue_free()
 
 	# A sun straight overhead has no opposite side; the fill still has to point somewhere real.
-	var overhead := DotLightRig.fill(doc, DotLightRig.aim_along(Vector3.DOWN), painted)
+	var overhead := GSLightRig.fill(doc, GSLightRig.aim_along(Vector3.DOWN), painted)
 	var up_travel := -Basis.from_euler(overhead.rotation).z
 	_check(is_finite(up_travel.x) and up_travel.y < 0.0,
 		"under an overhead sun the fill comes from a fixed side, not from NaN")
@@ -444,7 +444,7 @@ func _painted() -> void:
 func _zone() -> void:
 	_section("the inspector half")
 
-	var zone := DotLightZone.new()
+	var zone := GSLightZone.new()
 	zone.sun_pitch = -70.0
 	zone.fog_enabled = true
 	zone.fog_end = 9000.0
@@ -476,9 +476,9 @@ func _zone() -> void:
 func _contact_shade() -> void:
 	_section("contact shade: where a box meets a box")
 
-	var floor_box := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, -0.5, 0.0)), Vector3(10.0, 1.0, 10.0))
-	var cube := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.5, 0.0)), Vector3.ONE)
-	var on_floor := DotContactShade.build([floor_box, cube])
+	var floor_box := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, -0.5, 0.0)), Vector3(10.0, 1.0, 10.0))
+	var cube := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.5, 0.0)), Vector3.ONE)
+	var on_floor := GSContactShade.build([floor_box, cube])
 	_check(int(on_floor["bands"]) == 8 and int(on_floor["corners"]) == 4,
 		"a cube on a floor: a band each side of each foot edge and a square at each corner (%d, %d)" % [on_floor["bands"], on_floor["corners"]])
 	var darkest := 1.0
@@ -489,54 +489,54 @@ func _contact_shade() -> void:
 		darkest = minf(darkest, (on_floor["colors"][i] as Color).r)
 		highest = maxf(highest, at.y)
 		widest = maxf(widest, maxf(absf(at.x), absf(at.z)))
-	_check(is_equal_approx(darkest, 1.0 - DotContactShade.STRENGTH),
+	_check(is_equal_approx(darkest, 1.0 - GSContactShade.STRENGTH),
 		"as dark as STRENGTH at the crease (%.2f)" % darkest)
-	_check(highest < DotContactShade.WIDTH + 0.01 and widest < 0.5 + DotContactShade.WIDTH + 0.01,
+	_check(highest < GSContactShade.WIDTH + 0.01 and widest < 0.5 + GSContactShade.WIDTH + 0.01,
 		"reaching WIDTH up the cube and out across the floor, no further")
 
-	var tile_a := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(-1.0, 0.0, 0.0)), Vector3(2.0, 0.2, 2.0))
-	var tile_b := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(1.0, 0.0, 0.0)), Vector3(2.0, 0.2, 2.0))
-	_check(int(DotContactShade.build([tile_a, tile_b])["bands"]) == 0,
+	var tile_a := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(-1.0, 0.0, 0.0)), Vector3(2.0, 0.2, 2.0))
+	var tile_b := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(1.0, 0.0, 0.0)), Vector3(2.0, 0.2, 2.0))
+	_check(int(GSContactShade.build([tile_a, tile_b])["bands"]) == 0,
 		"two floor tiles side by side make no crease")
 
-	var sunk := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 1.0, 0.0)), Vector3(4.0, 3.0, 0.2))
-	_check(int(DotContactShade.build([floor_box, sunk])["bands"]) == 8,
+	var sunk := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 1.0, 0.0)), Vector3(4.0, 3.0, 0.2))
+	_check(int(GSContactShade.build([floor_box, sunk])["bands"]) == 8,
 		"a wall sunk into the floor makes the same crease as one standing on it")
 
-	var rug := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.005, 0.0)), Vector3(2.0, 0.01, 1.0))
-	_check(int(DotContactShade.build([floor_box, rug])["bands"]) == 0, "a rug makes no ring")
+	var rug := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.005, 0.0)), Vector3(2.0, 0.01, 1.0))
+	_check(int(GSContactShade.build([floor_box, rug])["bands"]) == 0, "a rug makes no ring")
 
-	var on_cube := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 1.25, 0.0)), Vector3(0.5, 0.5, 0.5))
-	var stacked := DotContactShade.build([cube, on_cube])
+	var on_cube := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 1.25, 0.0)), Vector3(0.5, 0.5, 0.5))
+	var stacked := GSContactShade.build([cube, on_cube])
 	_check(int(stacked["bands"]) == 8 and int(stacked["creases"]) == 2,
 		"a box on a box shades the top it stands on")
 
-	var ledge := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(4.8, 0.5, 0.0)), Vector3.ONE)
+	var ledge := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(4.8, 0.5, 0.0)), Vector3.ONE)
 	# Overhanging the edge: the floor's top is shaded only as far as it goes (the underside of
 	# the overhang and the floor's side under it are creases too, and are shaded).
 	var past := 0.0
-	for at: Vector3 in DotContactShade.build([floor_box, ledge])["vertices"]:
+	for at: Vector3 in GSContactShade.build([floor_box, ledge])["vertices"]:
 		if at.y > 0.0 and at.y < 0.01:
 			past = maxf(past, at.x)
 	_check(past > 4.0 and past <= 5.0 + 0.001, "a box over the floor's edge shades the floor only as far as it goes (%.3f)" % past)
 
-	var yawed := DotContactShade.box(Transform3D(Basis(Vector3.UP, deg_to_rad(30.0)), Vector3(0.0, 0.5, 0.0)), Vector3.ONE)
-	_check(int(DotContactShade.build([floor_box, yawed])["bands"]) >= 4, "a box turned on the floor is shaded too")
-	var tilted := DotContactShade.box(Transform3D(Basis(Vector3.RIGHT, deg_to_rad(20.0)), Vector3(0.0, 0.5, 0.0)), Vector3.ONE)
-	_check(int(DotContactShade.build([floor_box, tilted])["bands"]) == 0, "and a tilted one is left alone")
+	var yawed := GSContactShade.box(Transform3D(Basis(Vector3.UP, deg_to_rad(30.0)), Vector3(0.0, 0.5, 0.0)), Vector3.ONE)
+	_check(int(GSContactShade.build([floor_box, yawed])["bands"]) >= 4, "a box turned on the floor is shaded too")
+	var tilted := GSContactShade.box(Transform3D(Basis(Vector3.RIGHT, deg_to_rad(20.0)), Vector3(0.0, 0.5, 0.0)), Vector3.ONE)
+	_check(int(GSContactShade.build([floor_box, tilted])["bands"]) == 0, "and a tilted one is left alone")
 
-	var glass := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.5, 0.0)), Vector3.ONE, false, false)
-	var prop := DotContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.5, 0.0)), Vector3.ONE, true, false)
-	var prop_shade := DotContactShade.build([floor_box, prop])
-	_check(int(DotContactShade.build([floor_box, glass])["bands"]) == 0
+	var glass := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.5, 0.0)), Vector3.ONE, false, false)
+	var prop := GSContactShade.box(Transform3D(Basis.IDENTITY, Vector3(0.0, 0.5, 0.0)), Vector3.ONE, true, false)
+	var prop_shade := GSContactShade.build([floor_box, prop])
+	_check(int(GSContactShade.build([floor_box, glass])["bands"]) == 0
 		and int(prop_shade["bands"]) == 4
 		and (prop_shade["vertices"] as PackedVector3Array).size() < (on_floor["vertices"] as PackedVector3Array).size(),
 		"a box that does not cast makes none; one not shaded darkens the floor and draws nothing on itself")
 
-	_check(DotContactShade.mesh([cube]) == null
-		and int(DotContactShade.build([floor_box, cube, {"size": Vector3.ONE}, [Transform3D.IDENTITY, Vector3(NAN, 1.0, 1.0)], 7])["bands"]) == 8,
+	_check(GSContactShade.mesh([cube]) == null
+		and int(GSContactShade.build([floor_box, cube, {"size": Vector3.ONE}, [Transform3D.IDENTITY, Vector3(NAN, 1.0, 1.0)], 7])["bands"]) == 8,
 		"nothing touching is no mesh, and a malformed entry is skipped")
-	var node := DotContactShade.node([floor_box, cube])
+	var node := GSContactShade.node([floor_box, cube])
 	var shader := (node.material_override as ShaderMaterial).shader
 	_check(node.mesh != null and node.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		and shader.code.contains("blend_mix") and shader.code.contains("ALBEDO = vec3(0.0)") and shader.code.contains("unshaded"),
@@ -555,13 +555,13 @@ func _lamp_flicker() -> void:
 	var apart := false
 	for i in 2000:
 		var t := float(i) * 0.01
-		steady = steady and DotLampFlicker.scale(3, t, 0.0) == 1.0
-		var v := DotLampFlicker.scale(3, t, 0.8)
+		steady = steady and GSLampFlicker.scale(3, t, 0.0) == 1.0
+		var v := GSLampFlicker.scale(3, t, 0.8)
 		lo = minf(lo, v)
 		hi = maxf(hi, v)
-		same = same and v == DotLampFlicker.scale(3, t, 0.8)
-		calm_lo = minf(calm_lo, DotLampFlicker.scale(3, t, 0.8, false))
-		apart = apart or v != DotLampFlicker.scale(4, t, 0.8)
+		same = same and v == GSLampFlicker.scale(3, t, 0.8)
+		calm_lo = minf(calm_lo, GSLampFlicker.scale(3, t, 0.8, false))
+		apart = apart or v != GSLampFlicker.scale(4, t, 0.8)
 	_check(steady, "amount 0 is a steady lamp")
 	_check(lo >= 0.0 and hi <= 1.0, "the scale stays in 0..1 (%.2f..%.2f)" % [lo, hi])
 	_check(lo < 0.3, "a flickering lamp drops nearly out (%.2f)" % lo)
@@ -572,7 +572,7 @@ func _lamp_flicker() -> void:
 
 
 func _sheet_arrays(faces: Array) -> Array:
-	var sheet := DotLightmapSheet.new()
+	var sheet := GSLightmapSheet.new()
 	for f: Array in faces:
 		sheet.face(f[0], f[1], f[2], f[3], f[4])
 	var tool := SurfaceTool.new()
@@ -591,7 +591,7 @@ func _bake() -> void:
 		[Vector3(0, 0, 2), Vector3(0, 0.02, 2), Vector3(5, 0.02, 2), Vector3(5, 0, 2), Vector3.BACK],
 	]
 	var made := _sheet_arrays(faces)
-	var sheet: DotLightmapSheet = made[0]
+	var sheet: GSLightmapSheet = made[0]
 	var arrays: Array = made[1]
 	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var uv2: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV2] if arrays[Mesh.ARRAY_TEX_UV2] != null else PackedVector2Array()
@@ -620,18 +620,18 @@ func _bake() -> void:
 	var again: Array = _sheet_arrays(faces)[1]
 	_check(again[Mesh.ARRAY_TEX_UV2] == arrays[Mesh.ARRAY_TEX_UV2], "the same faces give the same sheet, every time")
 
-	var fp := DotLightBake.fingerprint({"boxes": [[1, 2, 3]], "lights": []})
-	_check(fp.length() == 64 and fp == DotLightBake.fingerprint({"lights": [], "boxes": [[1, 2, 3]]}),
+	var fp := GSLightBake.fingerprint({"boxes": [[1, 2, 3]], "lights": []})
+	_check(fp.length() == 64 and fp == GSLightBake.fingerprint({"lights": [], "boxes": [[1, 2, 3]]}),
 		"a fingerprint is a sha256, the same whatever order the keys came in")
-	_check(fp != DotLightBake.fingerprint({"boxes": [[1, 2, 3.5]], "lights": []}), "and a moved box is a different one")
+	_check(fp != GSLightBake.fingerprint({"boxes": [[1, 2, 3.5]], "lights": []}), "and a moved box is a different one")
 
 	var host := Node3D.new()
-	var refused := DotLightBake.attach(host, "res://nowhere.res", fp)
-	_check(not refused.ok and refused.error.code == (DotError.CODE_UNSUPPORTED if not DotLightBake.can_draw() else DotError.CODE_IO)
+	var refused := GSLightBake.attach(host, "res://nowhere.res", fp)
+	_check(not refused.ok and refused.error.code == (GSError.CODE_UNSUPPORTED if not GSLightBake.can_draw() else GSError.CODE_IO)
 		and host.get_child_count() == 0,
 		"headless, nothing is attached (%s), and the world is left as it was" % (refused.error.code if refused.error != null else "ok"))
-	var none := DotLightBake.store(null, fp, "user://x.res")
-	_check(not none.ok and none.error.code == DotError.CODE_INVALID, "storing nothing is refused")
+	var none := GSLightBake.store(null, fp, "user://x.res")
+	_check(not none.ok and none.error.code == GSError.CODE_INVALID, "storing nothing is refused")
 	host.free()
 	_done()
 
@@ -654,10 +654,10 @@ func _bake_stale() -> void:
 	lamp.light_bake_mode = Light3D.BAKE_STATIC
 	root.add_child(lamp)
 
-	var before := DotLightBake.scan(root)
-	var fp := DotLightBake.fingerprint(before)
-	_check(fp == DotLightBake.fingerprint(DotLightBake.scan(root)), "a scan hashes the same twice")
-	_check(DotLightBake.first_difference(DotLightBake.components(before), DotLightBake.components(before)) == "",
+	var before := GSLightBake.scan(root)
+	var fp := GSLightBake.fingerprint(before)
+	_check(fp == GSLightBake.fingerprint(GSLightBake.scan(root)), "a scan hashes the same twice")
+	_check(GSLightBake.first_difference(GSLightBake.components(before), GSLightBake.components(before)) == "",
 		"and its components agree with themselves")
 
 	var extra := OmniLight3D.new()
@@ -668,26 +668,26 @@ func _bake_stale() -> void:
 	prop.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	root.add_child(prop)
 	root.add_child(Node3D.new())
-	_check(DotLightBake.fingerprint(DotLightBake.scan(root)) == fp, "unrelated nodes (a dynamic light, a prop, a plain node) leave it valid")
+	_check(GSLightBake.fingerprint(GSLightBake.scan(root)) == fp, "unrelated nodes (a dynamic light, a prop, a plain node) leave it valid")
 
 	var with_env := {"boxes": [[1, 2.0004, 3]], "environment": {"fog": 1}, "props": [1]}
 	var other_env := {"boxes": [[1, 2, 3]], "environment": {"fog": 9}, "props": []}
-	_check(DotLightBake.fingerprint(with_env) == DotLightBake.fingerprint(other_env),
+	_check(GSLightBake.fingerprint(with_env) == GSLightBake.fingerprint(other_env),
 		"the environment and props are ignored, and floats rounded to a millimetre")
-	_check(DotLightBake.fingerprint({"boxes": [[1, 2.01, 3]]}) != DotLightBake.fingerprint(other_env), "a box moved 1 cm is stale")
+	_check(GSLightBake.fingerprint({"boxes": [[1, 2.01, 3]]}) != GSLightBake.fingerprint(other_env), "a box moved 1 cm is stale")
 
 	lamp.position = Vector3(0, 1, 0)
-	var after := DotLightBake.scan(root)
-	_check(DotLightBake.fingerprint(after) != fp, "moving a light makes it stale")
-	_check(DotLightBake.first_difference(DotLightBake.components(before), DotLightBake.components(after)) == "lights",
+	var after := GSLightBake.scan(root)
+	_check(GSLightBake.fingerprint(after) != fp, "moving a light makes it stale")
+	_check(GSLightBake.first_difference(GSLightBake.components(before), GSLightBake.components(after)) == "lights",
 		"and the first difference is named: lights")
 	lamp.position = Vector3.ZERO
 	lamp.light_energy = 2.0
-	_check(DotLightBake.fingerprint(DotLightBake.scan(root)) != fp, "so does a light's energy")
+	_check(GSLightBake.fingerprint(GSLightBake.scan(root)) != fp, "so does a light's energy")
 	lamp.light_energy = 1.0
 	wall.position = Vector3(1, 0, 0)
-	var moved := DotLightBake.scan(root)
-	_check(DotLightBake.first_difference(DotLightBake.components(before), DotLightBake.components(moved)) == "meshes",
+	var moved := GSLightBake.scan(root)
+	_check(GSLightBake.first_difference(GSLightBake.components(before), GSLightBake.components(moved)) == "meshes",
 		"a moved static mesh names meshes")
 	root.free()
 	_done()

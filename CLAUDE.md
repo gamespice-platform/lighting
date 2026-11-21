@@ -1,6 +1,6 @@
 # GameSpice Lighting
 
-A world's lighting as a document rather than as a scene: `DotLightDocument` is a dictionary in and a dictionary out (sun, ambient, fog, sky, baked-light count), `DotLightRig` turns one into a sun and an `Environment`, and `DotLightProfile` says how much of it this machine draws. An imported map carries its lighting in its manifest and the game applies it; game-airdrift applies imported maps' lighting this way, and game-fatal-contact gives each built-in map a document of its own.
+A world's lighting as a document rather than as a scene: `GSLightDocument` is a dictionary in and a dictionary out (sun, ambient, fog, sky, baked-light count), `GSLightRig` turns one into a sun and an `Environment`, and `GSLightProfile` says how much of it this machine draws. An imported map carries its lighting in its manifest and the game applies it; game-airdrift applies imported maps' lighting this way, and game-fatal-contact gives each built-in map a document of its own.
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first.
 
@@ -10,17 +10,17 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first.
 
 | Path | What |
 | --- | --- |
-| `core/dot_light_document.gd` | `DotLightDocument`: what the world is; `from_dictionary`, `to_dictionary`, `has_sun`, `has_ambient`, `sky_name`, `sky_top`/`has_sky_top`, `baked_light_count` |
-| `core/dot_light_profile.gd` | `DotLightProfile`: what this machine draws (tonemap, exposure, grade, fill, glow, fog, sky, shadows, occlusion); `high()`, `low()`, `web()`, `for_platform()` (low on a phone, web in a browser, else high) for baked worlds, `painted()` for hand-built ones; `is_compatibility()` |
-| `runtime/dot_light_rig.gd` | `DotLightRig`: `apply`, `environment`, `apply_fog` (the fog half, onto an existing Environment, for weather; API 6), `fill`, the procedural sky, `METRES_PER_UNIT` and `metres()` |
-| `runtime/dot_contact_shade.gd` | `DotContactShade`: fake ambient occlusion for a world of boxes; `box`, `node`, `mesh`, `material`, `build` |
-| `runtime/dot_lamp_flicker.gd` | `DotLampFlicker`: `scale(seed, time, amount, allow_flashes)`, a failing lamp's brightness as a pure function of time (API 9) |
-| `runtime/dot_light_zone.gd` | `DotLightZone`: the inspector half for a hand-built world; builds the lighting on `_ready` and steps aside |
-| `bake/dot_light_bake.gd` | `DotLightBake`: baked light for a world built in code; `fingerprint`, `attach` (runtime: refuses headless, a missing file at DEBUG, a stale one with a WARN), `prepare` and `store` (offline) |
-| `bake/dot_lightmap_sheet.gd` | `DotLightmapSheet`: deterministic UV2 for meshes of flat quads (the shelf packer); `face`, `pack`, `commit`, `size` |
+| `core/dot_light_document.gd` | `GSLightDocument`: what the world is; `from_dictionary`, `to_dictionary`, `has_sun`, `has_ambient`, `sky_name`, `sky_top`/`has_sky_top`, `baked_light_count` |
+| `core/dot_light_profile.gd` | `GSLightProfile`: what this machine draws (tonemap, exposure, grade, fill, glow, fog, sky, shadows, occlusion); `high()`, `low()`, `web()`, `for_platform()` (low on a phone, web in a browser, else high) for baked worlds, `painted()` for hand-built ones; `is_compatibility()` |
+| `runtime/dot_light_rig.gd` | `GSLightRig`: `apply`, `environment`, `apply_fog` (the fog half, onto an existing Environment, for weather; API 6), `fill`, the procedural sky, `METRES_PER_UNIT` and `metres()` |
+| `runtime/dot_contact_shade.gd` | `GSContactShade`: fake ambient occlusion for a world of boxes; `box`, `node`, `mesh`, `material`, `build` |
+| `runtime/dot_lamp_flicker.gd` | `GSLampFlicker`: `scale(seed, time, amount, allow_flashes)`, a failing lamp's brightness as a pure function of time (API 9) |
+| `runtime/dot_light_zone.gd` | `GSLightZone`: the inspector half for a hand-built world; builds the lighting on `_ready` and steps aside |
+| `bake/dot_light_bake.gd` | `GSLightBake`: baked light for a world built in code; `fingerprint`, `attach` (runtime: refuses headless, a missing file at DEBUG, a stale one with a WARN), `prepare` and `store` (offline) |
+| `bake/dot_lightmap_sheet.gd` | `GSLightmapSheet`: deterministic UV2 for meshes of flat quads (the shelf packer); `face`, `pack`, `commit`, `size` |
 | `bake/bake.sh` | bakes a directory of bake scenes in the editor under xvfb, Forward+ on Vulkan; prints `DOT_BAKE` lines |
 | `editor/dot_light_bake_runner.gd` | what the plugin starts under `--dot-bake-lightmaps=`: opens each scene, presses the editor's bake button, answers its file dialog, calls `store` |
-| `dot_lighting_api.gd` | the API level (`DotAddonApi`); bump `LEVEL` for anything a game could newly call, with a comment line saying what |
+| `dot_lighting_api.gd` | the API level (`GSAddonApi`); bump `LEVEL` for anything a game could newly call, with a comment line saying what |
 | `examples/lighting_selftest.tscn` | the suite |
 
 Paths except `examples/` are in `addons/dot_lighting/`.
@@ -44,10 +44,10 @@ The family's two steps ([family CLAUDE.md](../../CLAUDE.md#validating-anything))
 - **The Compatibility renderer clips before it tone maps.** A profile's light numbers are per renderer (`is_compatibility()`); one set tuned under Forward+ comes out white under the client shell, which draws Compatibility everywhere.
 - **`contrast` pivots at mid grey, so it crushes dark albedo in shade.** At `painted()`'s 1.12 a dark trunk or chair in shade goes to black; a world with dark props lowers it (mg-prop-hunt and game-hide-n-seek use 1.04). Check the near-black share of a frame, not only the blown one.
 - **The fill casts no shadow, has no specular and draws no sky disc.** There is still one sun: one shadow direction, one highlight. It is in the ambient colour so it reads as more sky.
-- **A painted world of boxes takes `DotContactShade`** under Compatibility (no SSAO): its own band mesh, never vertex colours on the game's two-triangle faces (a gradient the height of the wall). Black at the shade's alpha, never `blend_mul` (the Compatibility glow buffer is scaled down: every band came out black). A crease is drawn only on the face it lies on; the other face's band comes from the swapped pair (drawing both doubled it). [README](README.md#a-contact-shade-where-boxes-meet-dotcontactshade)
+- **A painted world of boxes takes `GSContactShade`** under Compatibility (no SSAO): its own band mesh, never vertex colours on the game's two-triangle faces (a gradient the height of the wall). Black at the shade's alpha, never `blend_mul` (the Compatibility glow buffer is scaled down: every band came out black). A crease is drawn only on the face it lies on; the other face's band comes from the swapped pair (drawing both doubled it). [README](README.md#a-contact-shade-where-boxes-meet-dotcontactshade)
 - **A world built in code is baked from a copy of itself.** `LightmapGI.bake` is not bound for scripts in 4.7, so the game saves its drawn meshes as a bake scene (`prepare`) and the editor bakes that; the runner drives the editor's own button and file dialog. The editor needs Vulkan (Compatibility cannot bake); a real card bakes a map in seconds, Mesa's software Vulkan takes many minutes, so the family bakes on the GPU box (`~/godot/gpu.sh`; game-zombie-zone's `tools/bake_lightmaps.sh`).
 - **The shipped bake is one file with no import.** The editor's `.lmbake` points at an `.exr` imported as BPTC, which a browser may not decode and a mounted pack never re-imports. `store` reads the EXR, keeps it HDR in RGB9E5 and saves one zstd-compressed `LightmapGIData`; it needs a renderer to run in, so it runs in the editor.
-- **UV2 comes from `DotLightmapSheet`, never `lightmap_unwrap`.** The unwrapper is editor-only and not deterministic; the client rebuilds the mesh from the document and must get exactly the UV2 the bake saw. Change the layout and bump its `VERSION`: every fingerprint includes it.
+- **UV2 comes from `GSLightmapSheet`, never `lightmap_unwrap`.** The unwrapper is editor-only and not deterministic; the client rebuilds the mesh from the document and must get exactly the UV2 the bake saw. Change the layout and bump its `VERSION`: every fingerprint includes it.
 - **A bake carries a fingerprint of what it was baked from**, which the game computes from its document; a mismatch is refused with a WARN naming the first differing component (pass `parts` to `prepare` and `attach`) and the world drawn with its live lights. `fingerprint` ignores `environment`/`props`/sky/fog and rounds floats to a millimetre; `scan(root)` makes parts from a scene (static lights, static meshes + UV2). Mesh names must be the same on every build (a lightmap names its meshes by path from the `LightmapGI`).
 - **Lights baked whole are `BAKE_STATIC` at runtime** (they skip lightmapped surfaces and still light what moves); a sun a day cycle turns is `BAKE_DYNAMIC` in the bake scene, so only its bounce is baked.
 - **`baked_light_count` exists so nobody places those lights again** and lights the world twice.

@@ -3,7 +3,7 @@ extends EditorPlugin
 
 ## Editor entry point for GameSpice Lighting. Registers inspector types, and with
 ## `--dot-bake-lightmaps=` on the command line bakes a directory of bake scenes and quits
-## ([DotLightBake]); without it, nothing else. A game that bakes keeps it enabled in
+## ([GSLightBake]); without it, nothing else. A game that bakes keeps it enabled in
 ## project.godot: the editor reads [editor_plugins] from there alone, not from override.cfg.
 ##
 ## No autoloads: a server and a client in one process, or two worlds mid-load, need two rigs.
@@ -12,7 +12,7 @@ const _ICON := "res://addons/dot_lighting/icon_placeholder.svg"
 
 const _TYPES := [
 	[
-		"DotLightZone",
+		"GSLightZone",
 		"Node3D",
 		"res://addons/dot_lighting/runtime/dot_light_zone.gd",
 	],

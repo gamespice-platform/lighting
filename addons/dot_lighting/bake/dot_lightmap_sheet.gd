@@ -1,4 +1,4 @@
-class_name DotLightmapSheet
+class_name GSLightmapSheet
 extends RefCounted
 
 ## The second UV set a baked lightmap needs, for a mesh a game builds in code out of flat
@@ -6,7 +6,7 @@ extends RefCounted
 ## a [SurfaceTool] with its UV2, and set [member size] as the mesh's `lightmap_size_hint`.
 ##
 ## [codeblock]
-## var sheet := DotLightmapSheet.new()
+## var sheet := GSLightmapSheet.new()
 ## for box in boxes:
 ##     for face in faces_of(box):
 ##         sheet.face(face.a, face.b, face.c, face.d, face.normal)
@@ -133,4 +133,4 @@ func commit(tool: SurfaceTool) -> void:
 
 
 func describe() -> String:
-	return "DotLightmapSheet(%d faces, %dx%d texels at %.2f m)" % [_faces.size(), size.x, size.y, texel]
+	return "GSLightmapSheet(%d faces, %dx%d texels at %.2f m)" % [_faces.size(), size.x, size.y, texel]

@@ -1,11 +1,11 @@
-class_name DotLampFlicker
+class_name GSLampFlicker
 extends RefCounted
 
 ## A failing lamp: the brightness scale of a light at a moment, as a pure function of time, so a
 ## server and a client, or two runs, agree, and a suite can assert it.
 ##
 ## [codeblock]
-## lamp.light_energy = base_energy * DotLampFlicker.scale(lamp_seed, time, 0.6)
+## lamp.light_energy = base_energy * GSLampFlicker.scale(lamp_seed, time, 0.6)
 ## [/codeblock]
 ##
 ## It hums at a lamp's own pace (two sines at seed-dependent rates) and now and then drops almost

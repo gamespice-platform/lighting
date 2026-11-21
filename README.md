@@ -11,8 +11,8 @@ Copy `addons/dot_lighting/` and [GameSpice Core](https://github.com/gamespice-pl
 ## Use
 
 ```gdscript
-var doc := DotLightDocument.from_dictionary(manifest.get("lighting", {}))
-DotLightRig.apply(world_root, doc, DotLightProfile.web())
+var doc := GSLightDocument.from_dictionary(manifest.get("lighting", {}))
+GSLightRig.apply(world_root, doc, GSLightProfile.web())
 ```
 
 A map converted from another engine carries its own sun direction and colour, fog distance and sky. Reading those, instead of lighting every map with one hardcoded sun, is the main reason this exists.
@@ -21,7 +21,7 @@ Every field of a document is optional. A document with no sun keeps the consumer
 
 ## Document and profile
 
-`DotLightDocument` says what the world is and is the same on every machine. `DotLightProfile` says what this machine draws of it, so a low settings choice never changes the world itself.
+`GSLightDocument` says what the world is and is the same on every machine. `GSLightProfile` says what this machine draws of it, so a low settings choice never changes the world itself.
 
 | Profile | Tone mapping | Glow | Fog | Sun shadows |
 | --- | --- | --- | --- | --- |
@@ -46,20 +46,20 @@ Every field of a document is optional. A document with no sun keeps the consumer
 All of these default to the old look, so existing worlds do not change.
 
 ```gdscript
-var p := DotLightProfile.painted()
+var p := GSLightProfile.painted()
 p.sun_shadows = true            # a small map can afford them in a browser
-DotLightRig.apply(world_root, doc, p)
+GSLightRig.apply(world_root, doc, p)
 ```
 
 ## Contact shade
 
-The Compatibility renderer has no ambient occlusion, so a crate looks like it floats above the floor. `DotContactShade` builds one mesh of thin dark bands along every concave crease between boxes (box on floor, wall in a corner), fading out 45 cm from the crease.
+The Compatibility renderer has no ambient occlusion, so a crate looks like it floats above the floor. `GSContactShade` builds one mesh of thin dark bands along every concave crease between boxes (box on floor, wall in a corner), fading out 45 cm from the crease.
 
 ```gdscript
 var boxes: Array = []
 for b in map_boxes:
-    boxes.append(DotContactShade.box(b.transform, b.size))
-add_child(DotContactShade.node(boxes))
+    boxes.append(GSContactShade.box(b.transform, b.size))
+add_child(GSContactShade.node(boxes))
 ```
 
 - It is one unshaded draw call for a whole map and does nothing per frame. 449 boxes build in under 0.1 s.
@@ -77,21 +77,21 @@ The sky's top is the ambient colour unless the document has `"sky_top": [r, g, b
 ## Conversion pitfalls handled here
 
 - **Brightness is not energy.** Older BSP formats store a compiled brightness (20 to 600 across ordinary maps). The document carries it unconverted and the rig curves it against a reference.
-- **Yaw handedness.** `DotLightRig.sun_rotation` builds the direction in the source convention and swaps axes once, on the vector.
+- **Yaw handedness.** `GSLightRig.sun_rotation` builds the direction in the source convention and swaps axes once, on the vector.
 - **A vertical sun** has no `looking_at`. The rig handles it, and the test asserts no `NaN`.
 
 ## Baked light for generated maps
 
-A map built from a document at load time has nothing for the editor to bake. `DotLightBake.prepare` copies the drawn meshes into a scene with a `LightmapGI`, and the editor bakes it:
+A map built from a document at load time has nothing for the editor to bake. `GSLightBake.prepare` copies the drawn meshes into a scene with a `LightmapGI`, and the editor bakes it:
 
 ```bash
 addons/dot_lighting/bake/bake.sh <project> res://<dir>
 ```
 
-The plugin must be enabled in `project.godot` (it does nothing without `--dot-bake-lightmaps=`). Baking needs Vulkan: a real GPU takes seconds per map, software rendering takes many minutes. The result is one `LightmapGIData` per map. At runtime the client rebuilds the same meshes (same names, same second UV set from `DotLightmapSheet`) and attaches it:
+The plugin must be enabled in `project.godot` (it does nothing without `--dot-bake-lightmaps=`). Baking needs Vulkan: a real GPU takes seconds per map, software rendering takes many minutes. The result is one `LightmapGIData` per map. At runtime the client rebuilds the same meshes (same names, same second UV set from `GSLightmapSheet`) and attaches it:
 
 ```gdscript
-var res := DotLightBake.attach(map_node, "res://lightmaps/%s.res" % id, DotLightBake.fingerprint(my_document_parts))
+var res := GSLightBake.attach(map_node, "res://lightmaps/%s.res" % id, GSLightBake.fingerprint(my_document_parts))
 if res.ok:
     for lamp in my_lamps: lamp.light_bake_mode = Light3D.BAKE_STATIC   # baked, not drawn twice
 ```

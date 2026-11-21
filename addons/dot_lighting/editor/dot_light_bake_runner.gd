@@ -7,7 +7,7 @@ extends Node
 ##
 ## `LightmapGI.bake` is not bound for scripts in 4.7, so this opens each scene, presses the
 ## editor's "Bake Lightmaps" button, answers its file dialog with `<scene>.lmbake`, then calls
-## [method DotLightBake.store]. Output is `DOT_BAKE ok|fail ...` lines for bake.sh.
+## [method GSLightBake.store]. Output is `DOT_BAKE ok|fail ...` lines for bake.sh.
 
 const BUTTON_TEXT := "Bake Lightmaps"
 
@@ -48,10 +48,10 @@ func _bake(scene: String) -> String:
 	if root == null or root.scene_file_path != scene:
 		return "did not open"
 
-	var gi := root.get_node_or_null(NodePath(String(DotLightBake.NODE_NAME))) as LightmapGI
+	var gi := root.get_node_or_null(NodePath(String(GSLightBake.NODE_NAME))) as LightmapGI
 
 	if gi == null:
-		return "has no %s" % DotLightBake.NODE_NAME
+		return "has no %s" % GSLightBake.NODE_NAME
 
 	gi.light_data = null
 	EditorInterface.edit_node(gi)
@@ -78,8 +78,8 @@ func _bake(scene: String) -> String:
 		return "the bake made no light data (see the editor's errors above)"
 
 	var ms := Time.get_ticks_msec() - started
-	var stored := DotLightBake.store(gi.light_data, str(root.get_meta(DotLightBake.META_FINGERPRINT, "")),
-		str(root.get_meta(DotLightBake.META_OUT, "")), root.get_meta(DotLightBake.META_COMPONENTS, {}))
+	var stored := GSLightBake.store(gi.light_data, str(root.get_meta(GSLightBake.META_FINGERPRINT, "")),
+		str(root.get_meta(GSLightBake.META_OUT, "")), root.get_meta(GSLightBake.META_COMPONENTS, {}))
 
 	if not stored.ok:
 		return "baked but not stored: %s" % stored.error.message

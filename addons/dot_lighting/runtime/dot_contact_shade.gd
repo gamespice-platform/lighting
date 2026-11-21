@@ -1,4 +1,4 @@
-class_name DotContactShade
+class_name GSContactShade
 extends RefCounted
 
 ## A contact shade for a world built of boxes: a soft dark band where a box meets the floor, a
@@ -8,8 +8,8 @@ extends RefCounted
 ## [codeblock]
 ## var boxes: Array = []
 ## for b in my_map.boxes:
-##     boxes.append(DotContactShade.box(b.transform, b.size))
-## add_child(DotContactShade.node(boxes))          # one mesh, built once at load
+##     boxes.append(GSContactShade.box(b.transform, b.size))
+## add_child(GSContactShade.node(boxes))          # one mesh, built once at load
 ## [/codeblock]
 ##
 ## [b]An overlay, not vertex colours on the game's meshes[/b]: a box face is two triangles, so a

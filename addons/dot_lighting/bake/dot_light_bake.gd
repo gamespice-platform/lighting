@@ -1,4 +1,4 @@
-class_name DotLightBake
+class_name GSLightBake
 extends RefCounted
 
 ## Baked light for a world a game builds in code: the offline half writes one file per map, the
@@ -9,11 +9,11 @@ extends RefCounted
 ## (`bake/bake.sh`), and [method store] writes ONE self-contained resource for the pack.
 ##
 ## At runtime the client rebuilds the same meshes under the same node names, with the same UV2
-## ([DotLightmapSheet]), and calls [method attach]. A file whose fingerprint disagrees is refused
+## ([GSLightmapSheet]), and calls [method attach]. A file whose fingerprint disagrees is refused
 ## with a WARN and the live lights are used; no bake at all is the same fallback, said at DEBUG.
 ##
 ## [codeblock]
-## var res := DotLightBake.attach(map_node, "res://lightmaps/%s.res" % id, my_fingerprint)
+## var res := GSLightBake.attach(map_node, "res://lightmaps/%s.res" % id, my_fingerprint)
 ## if res.ok:
 ##     for lamp in my_lamps: lamp.light_bake_mode = Light3D.BAKE_STATIC   # baked, not drawn twice
 ## [/codeblock]
@@ -51,10 +51,10 @@ const MAX_TEXTURE_SIZE := 2048
 
 
 ## A stable hash of [param parts] (anything JSON can hold) together with this file's and
-## [DotLightmapSheet]'s versions. The bake and the runtime compute it from the same document.
+## [GSLightmapSheet]'s versions. The bake and the runtime compute it from the same document.
 ## A Dictionary's [constant IGNORED_PARTS] are dropped, floats rounded and Vectors flattened.
 static func fingerprint(parts: Variant) -> String:
-	var text := JSON.stringify([VERSION, DotLightmapSheet.VERSION, _canonical(_relevant(parts))], "", true, true)
+	var text := JSON.stringify([VERSION, GSLightmapSheet.VERSION, _canonical(_relevant(parts))], "", true, true)
 	return text.sha256_text()
 
 
@@ -174,19 +174,19 @@ static func can_draw() -> bool:
 ## `CODE_PARSE` (not a bake, a WARN).
 ## Pass [param expected_parts] (what [method fingerprint] was made from) and a stale WARN names the
 ## first component that differs.
-static func attach(host: Node3D, path: String, expected: String, expected_parts: Dictionary = {}) -> DotResult:
+static func attach(host: Node3D, path: String, expected: String, expected_parts: Dictionary = {}) -> GSResult:
 	if not can_draw():
-		return DotResult.fail(DotError.CODE_UNSUPPORTED, "nothing draws a lightmap in a headless process")
+		return GSResult.fail(GSError.CODE_UNSUPPORTED, "nothing draws a lightmap in a headless process")
 
 	if not ResourceLoader.exists(path):
-		DotLog.debug(CHANNEL, "no bake for this world; its live lights draw it", {"path": path})
-		return DotResult.fail(DotError.CODE_IO, "no bake at %s" % path)
+		GSLog.debug(CHANNEL, "no bake for this world; its live lights draw it", {"path": path})
+		return GSResult.fail(GSError.CODE_IO, "no bake at %s" % path)
 
 	var data := ResourceLoader.load(path, "", ResourceLoader.CACHE_MODE_REUSE) as LightmapGIData
 
 	if data == null:
-		DotLog.warn(CHANNEL, "a bake file is not a lightmap; the world is drawn with its live lights", {"path": path})
-		return DotResult.fail(DotError.CODE_PARSE, "%s is not a LightmapGIData" % path)
+		GSLog.warn(CHANNEL, "a bake file is not a lightmap; the world is drawn with its live lights", {"path": path})
+		return GSResult.fail(GSError.CODE_PARSE, "%s is not a LightmapGIData" % path)
 
 	var baked_from := str(data.get_meta(META_FINGERPRINT, ""))
 
@@ -197,10 +197,10 @@ static func attach(host: Node3D, path: String, expected: String, expected_parts:
 			which = "(no components stored: baked by an older tool, or the version changed)"
 		elif which == "" and not expected_parts.is_empty():
 			which = "(version or settings, parts agree)"
-		DotLog.warn(CHANNEL, "a bake is stale (its world changed since); the world is drawn with its live lights", {
+		GSLog.warn(CHANNEL, "a bake is stale (its world changed since); the world is drawn with its live lights", {
 			"path": path, "baked": baked_from.left(12), "now": expected.left(12), "first_difference": which,
 		})
-		return DotResult.fail(DotError.CODE_INTEGRITY, "%s was baked from different geometry" % path)
+		return GSResult.fail(GSError.CODE_INTEGRITY, "%s was baked from different geometry" % path)
 
 	var old := host.get_node_or_null(NodePath(String(NODE_NAME)))
 
@@ -212,8 +212,8 @@ static func attach(host: Node3D, path: String, expected: String, expected_parts:
 	gi.name = NODE_NAME
 	gi.light_data = data
 	host.add_child(gi)
-	DotLog.debug(CHANNEL, "baked light laid over a world", {"path": path, "meshes": data.get_user_count()})
-	return DotResult.success(gi)
+	GSLog.debug(CHANNEL, "baked light laid over a world", {"path": path, "meshes": data.get_user_count()})
+	return GSResult.success(gi)
 
 
 ## Offline: adds the [LightmapGI] the editor bakes to [param root] (a bake scene) and records
@@ -243,14 +243,14 @@ static func prepare(root: Node3D, fp: String, out_path: String, settings: Dictio
 ## Offline, after the editor baked: [param data] (the editor's `.lmbake`) as one self-contained
 ## file at [param out_path], stamped with [param fp]. Needs a rendering device (the textures'
 ## pixels are read back from it), so it runs in the editor, never headless.
-static func store(data: LightmapGIData, fp: String, out_path: String, parts_hashes: Dictionary = {}) -> DotResult:
+static func store(data: LightmapGIData, fp: String, out_path: String, parts_hashes: Dictionary = {}) -> GSResult:
 	if data == null:
-		return DotResult.fail(DotError.CODE_INVALID, "no light data to store")
+		return GSResult.fail(GSError.CODE_INVALID, "no light data to store")
 
 	var textures := data.get_lightmap_textures()
 
 	if textures.is_empty() or textures[0] == null:
-		return DotResult.fail(DotError.CODE_INVALID, "the bake has no lightmap texture")
+		return GSResult.fail(GSError.CODE_INVALID, "the bake has no lightmap texture")
 
 	var source := textures[0] as TextureLayered
 	var layers := source.get_layers()
@@ -268,7 +268,7 @@ static func store(data: LightmapGIData, fp: String, out_path: String, parts_hash
 		for i in layers:
 			var layer := source.get_layer_data(i)
 			if layer == null:
-				return DotResult.fail(DotError.CODE_IO, "could not read layer %d of %s" % [i, exr])
+				return GSResult.fail(GSError.CODE_IO, "could not read layer %d of %s" % [i, exr])
 			if layer.is_compressed():
 				layer.decompress()
 			images.append(layer)
@@ -280,7 +280,7 @@ static func store(data: LightmapGIData, fp: String, out_path: String, parts_hash
 	var made := array.create_from_images(images)
 
 	if made != OK:
-		return DotResult.failure(DotError.from_engine(made, "building the lightmap array"))
+		return GSResult.failure(GSError.from_engine(made, "building the lightmap array"))
 
 	var out := data.duplicate() as LightmapGIData
 	out.set_lightmap_textures([array])
@@ -290,9 +290,9 @@ static func store(data: LightmapGIData, fp: String, out_path: String, parts_hash
 	var saved := ResourceSaver.save(out, out_path, ResourceSaver.FLAG_COMPRESS)
 
 	if saved != OK:
-		return DotResult.failure(DotError.from_engine(saved, "saving %s" % out_path))
+		return GSResult.failure(GSError.from_engine(saved, "saving %s" % out_path))
 
-	return DotResult.success({
+	return GSResult.success({
 		"path": out_path, "layers": layers, "size": images[0].get_size(),
 		"bytes": FileAccess.get_file_as_bytes(out_path).size(),
 	})

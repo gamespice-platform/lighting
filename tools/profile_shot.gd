@@ -19,11 +19,11 @@ func _initialize() -> void:
 	box.mesh = BoxMesh.new()
 	box.position = Vector3(0, 0.5, 0)
 	holder.add_child(box)
-	var doc := DotLightDocument.new()
+	var doc := GSLightDocument.new()
 	await process_frame
 	var name := "low" if OS.get_cmdline_user_args().has("low") else "high"
-	var prof: DotLightProfile = DotLightProfile.low() if name == "low" else DotLightProfile.high()
-	DotLightRig.apply(holder, doc, prof)
+	var prof: GSLightProfile = GSLightProfile.low() if name == "low" else GSLightProfile.high()
+	GSLightRig.apply(holder, doc, prof)
 	for i in 4:
 		await process_frame
 	root.get_texture().get_image().save_png("res://screenshots/profile_%s.png" % name)

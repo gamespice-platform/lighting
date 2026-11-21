@@ -1,10 +1,10 @@
-class_name DotLightRig
+class_name GSLightRig
 extends RefCounted
 
-## Turns a [DotLightDocument] into a sun and an [Environment] under a node.
+## Turns a [GSLightDocument] into a sun and an [Environment] under a node.
 ##
 ## [codeblock]
-## DotLightRig.apply(world_root, DotLightDocument.from_dictionary(manifest["lighting"]))
+## GSLightRig.apply(world_root, GSLightDocument.from_dictionary(manifest["lighting"]))
 ## [/codeblock]
 ##
 ## A baked world has its light in its textures, so the sun here lights characters, props and
@@ -13,19 +13,19 @@ extends RefCounted
 
 ## Applies [param doc] under [param parent] and returns the sun it made.
 ##
-## [param profile] decides what this machine draws; null means [method DotLightProfile.high].
+## [param profile] decides what this machine draws; null means [method GSLightProfile.high].
 ## Safe on an empty document: every field is optional and absent keeps the default.
 static func apply(
 	parent: Node3D,
-	doc: DotLightDocument,
-	profile: DotLightProfile = null
+	doc: GSLightDocument,
+	profile: GSLightProfile = null
 ) -> DirectionalLight3D:
 	if parent == null:
 		return null
 	if doc == null:
-		doc = DotLightDocument.new()
+		doc = GSLightDocument.new()
 	if profile == null:
-		profile = DotLightProfile.high()
+		profile = GSLightProfile.high()
 
 	var light := DirectionalLight3D.new()
 	light.name = "Sun"
@@ -54,9 +54,9 @@ static func apply(
 
 
 ## The shadowless light from the side of the sky the sun is not on; see
-## [member DotLightProfile.fill_energy]. [param sun_rotation] is the sun's. A sun straight
+## [member GSLightProfile.fill_energy]. [param sun_rotation] is the sun's. A sun straight
 ## overhead has no opposite side, so the fill then comes from a fixed one.
-static func fill(doc: DotLightDocument, sun_rotation: Vector3, profile: DotLightProfile) -> DirectionalLight3D:
+static func fill(doc: GSLightDocument, sun_rotation: Vector3, profile: GSLightProfile) -> DirectionalLight3D:
 	var travel := -Basis.from_euler(sun_rotation).z
 	var across := Vector3(-travel.x, 0.0, -travel.z)
 	if across.length_squared() < 0.0025:
@@ -107,13 +107,13 @@ static func aim_along(direction: Vector3) -> Vector3:
 
 ## The [WorldEnvironment] a document and a profile describe.
 static func environment(
-	doc: DotLightDocument,
-	profile: DotLightProfile = null
+	doc: GSLightDocument,
+	profile: GSLightProfile = null
 ) -> WorldEnvironment:
 	if doc == null:
-		doc = DotLightDocument.new()
+		doc = GSLightDocument.new()
 	if profile == null:
-		profile = DotLightProfile.high()
+		profile = GSLightProfile.high()
 
 	var node := WorldEnvironment.new()
 	node.name = "Lighting"
@@ -166,7 +166,7 @@ static func environment(
 
 ## Writes [param doc]'s fog onto [param env] (off when the document has none), so weather can
 ## change the fog the way a map's lighting does. [param metres_per_unit] is 1.0 for metres.
-static func apply_fog(env: Environment, doc: DotLightDocument, metres_per_unit: float = METRES_PER_UNIT) -> void:
+static func apply_fog(env: Environment, doc: GSLightDocument, metres_per_unit: float = METRES_PER_UNIT) -> void:
 	if env == null or doc == null:
 		return
 	if not doc.fog_enabled:
@@ -186,10 +186,10 @@ static func apply_fog(env: Environment, doc: DotLightDocument, metres_per_unit: 
 	env.fog_sky_affect = 0.0
 
 
-## A sky from the world's own numbers, since the named [member DotLightDocument.sky_name] is
-## another game's texture. The fog colour is the horizon, the top is [member DotLightDocument.sky_top]
+## A sky from the world's own numbers, since the named [member GSLightDocument.sky_name] is
+## another game's texture. The fog colour is the horizon, the top is [member GSLightDocument.sky_top]
 ## or else the ambient, and the ground half is dark and neutral.
-static func _sky(doc: DotLightDocument, horizon: Color, below_horizon: bool = false) -> Sky:
+static func _sky(doc: GSLightDocument, horizon: Color, below_horizon: bool = false) -> Sky:
 	var mat := ProceduralSkyMaterial.new()
 	mat.sky_horizon_color = horizon
 	# sky_top, then ambient, then a darker horizon. The ambient LIGHT is untouched by sky_top.
@@ -202,7 +202,7 @@ static func _sky(doc: DotLightDocument, horizon: Color, below_horizon: bool = fa
 	mat.sky_energy_multiplier = 1.0
 	mat.ground_horizon_color = horizon
 	# The lower half mirrors the upper when the world floats in its sky; see
-	# [member DotLightProfile.sky_below_horizon].
+	# [member GSLightProfile.sky_below_horizon].
 	mat.ground_bottom_color = mat.sky_top_color if below_horizon else horizon.darkened(0.7)
 	mat.ground_energy_multiplier = 1.0
 	# A disc only where there is a sun: small and bright, to agree with the baked hard shadows.

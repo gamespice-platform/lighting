@@ -1,4 +1,4 @@
-class_name DotLightProfile
+class_name GSLightProfile
 extends Resource
 
 ## How much rendering a machine is asked to do, and what it costs.
@@ -25,7 +25,7 @@ extends Resource
 ## Draw a sky behind the world, rather than a flat colour.
 ##
 ## On everywhere: a flat background fills the same pixels. It is the sky the world's own numbers
-## describe, not the one it named ([member DotLightDocument.sky_name]).
+## describe, not the one it named ([member GSLightDocument.sky_name]).
 @export var sky: bool = true
 
 ## The sky continues below the horizon, instead of turning into dark ground.
@@ -38,7 +38,7 @@ extends Resource
 @export var sun_shadows: bool = true
 
 ## What a brightness of this much means an energy of 1.0.
-## See [member DotLightDocument.sun_brightness] for why this is a division.
+## See [member GSLightDocument.sun_brightness] for why this is a division.
 @export_range(1.0, 2000.0, 1.0) var brightness_reference: float = 200.0
 
 @export_range(0.0, 8.0, 0.01) var ambient_energy: float = 0.8
@@ -80,7 +80,7 @@ static func is_compatibility() -> bool:
 ## Filmic white 3.0, a fill and a lower ambient, a little contrast and saturation, and AO where
 ## available. Under Compatibility the sun and fill are divided down and the exposure lowered, as
 ## it clips where Forward+ rolls off. A game changes the rest afterwards; everything is a field.
-static func painted() -> DotLightProfile:
+static func painted() -> GSLightProfile:
 	var p := for_platform()
 	p.tonemap_white = 3.0
 	p.contrast = 1.12
@@ -101,23 +101,23 @@ static func painted() -> DotLightProfile:
 ## The stock profile for this machine: a phone (native, or a phone's browser) gets [method low],
 ## a desktop browser [method web], everything else [method high]. Games call this and never
 ## test the platform themselves.
-static func for_platform() -> DotLightProfile:
-	if DotPlatform.is_mobile() or OS.has_feature("web_android") or OS.has_feature("web_ios"):
+static func for_platform() -> GSLightProfile:
+	if GSPlatform.is_mobile() or OS.has_feature("web_android") or OS.has_feature("web_ios"):
 		return low()
-	if DotPlatform.is_web():
+	if GSPlatform.is_web():
 		return web()
 	return high()
 
 
 ## Everything on. A desktop.
-static func high() -> DotLightProfile:
-	return DotLightProfile.new()
+static func high() -> GSLightProfile:
+	return GSLightProfile.new()
 
 
 ## No glow and no shadows: two full-screen costs a weak GPU should not pay.
 ## The tone map stays: it is free, and switching it off changes the look for nothing saved.
-static func low() -> DotLightProfile:
-	var p := DotLightProfile.new()
+static func low() -> GSLightProfile:
+	var p := GSLightProfile.new()
 	p.glow = false
 	p.sun_shadows = false
 	return p
@@ -126,7 +126,7 @@ static func low() -> DotLightProfile:
 ## What a browser gets by default.
 ## Glow survives and shadows do not: on the web the shadow pass scales with geometry in the
 ## frame, glow is a fixed screen cost.
-static func web() -> DotLightProfile:
-	var p := DotLightProfile.new()
+static func web() -> GSLightProfile:
+	var p := GSLightProfile.new()
 	p.sun_shadows = false
 	return p

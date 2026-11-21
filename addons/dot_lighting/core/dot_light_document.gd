@@ -1,4 +1,4 @@
-class_name DotLightDocument
+class_name GSLightDocument
 extends RefCounted
 
 ## What a world's lighting is, as data rather than as a scene.
@@ -7,8 +7,8 @@ extends RefCounted
 ## Every consumer here takes one of these.
 ##
 ## [codeblock]
-## var doc := DotLightDocument.from_dictionary(manifest.get("lighting", {}))
-## DotLightRig.apply(world_root, doc)
+## var doc := GSLightDocument.from_dictionary(manifest.get("lighting", {}))
+## GSLightRig.apply(world_root, doc)
 ## [/codeblock]
 ##
 ## Every field is optional and absent is not zero ([member has_sun] and friends): "the map said
@@ -16,7 +16,7 @@ extends RefCounted
 
 ## Degrees. The sun's own pitch and yaw, in the source world's convention.
 ##
-## Stored unconverted; [method DotLightRig.sun_direction] converts the direction vector once.
+## Stored unconverted; [method GSLightRig.sun_direction] converts the direction vector once.
 var sun_pitch: float = 0.0
 var sun_yaw: float = 0.0
 var has_sun: bool = false
@@ -66,8 +66,8 @@ var has_sky_top: bool = false
 var baked_light_count: int = 0
 
 
-static func from_dictionary(data: Dictionary) -> DotLightDocument:
-	var doc := DotLightDocument.new()
+static func from_dictionary(data: Dictionary) -> GSLightDocument:
+	var doc := GSLightDocument.new()
 	if data.is_empty():
 		return doc
 

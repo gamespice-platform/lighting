@@ -1,11 +1,11 @@
-class_name DotLightZone
+class_name GSLightZone
 extends Node3D
 
 ## A lighting document, placed in a scene and applied when it enters the tree.
 ##
 ## The inspector half of the addon, for a hand-built world: point it at a JSON file or fill
-## the exports in and it builds the same sun and [Environment] [DotLightRig] would.
-## A world built from an imported map does not need this — it calls [DotLightRig.apply]
+## the exports in and it builds the same sun and [Environment] [GSLightRig] would.
+## A world built from an imported map does not need this — it calls [GSLightRig.apply]
 ## with the document its manifest already carries — and that is the usual case here.
 ##
 ## The node makes the lighting and steps out of the way, so nothing holds a stale reference.
@@ -15,8 +15,8 @@ const CHANNEL := "lighting"
 ## A JSON file holding a lighting document. Overrides the exports below when it loads.
 @export_file("*.json") var document_path: String = ""
 
-## What this machine draws. Null takes [method DotLightProfile.high].
-@export var profile: DotLightProfile = null
+## What this machine draws. Null takes [method GSLightProfile.high].
+@export var profile: GSLightProfile = null
 
 @export_group("Sun")
 @export var sun_enabled: bool = true
@@ -34,7 +34,7 @@ const CHANNEL := "lighting"
 
 @export_group("Sky")
 ## Off draws the zenith in the ambient colour, as a document without `sky_top` does. On
-## for a world whose shade should be paler than its sky; see [member DotLightDocument.sky_top].
+## for a world whose shade should be paler than its sky; see [member GSLightDocument.sky_top].
 @export var sky_top_enabled: bool = false
 @export var sky_top: Color = Color(0.3, 0.56, 0.96)
 
@@ -43,27 +43,27 @@ var sun: DirectionalLight3D = null
 
 
 func _ready() -> void:
-	sun = DotLightRig.apply(self, document(), profile)
+	sun = GSLightRig.apply(self, document(), profile)
 
 
 ## The document this node describes, from its file if it has a readable one and from its
 ## exports otherwise.
 ##
 ## A file that fails to parse falls back to the exports: a black screen reads as a broken build.
-func document() -> DotLightDocument:
+func document() -> GSLightDocument:
 	if not document_path.is_empty() and FileAccess.file_exists(document_path):
 		var text := FileAccess.get_file_as_string(document_path)
 		var parsed: Variant = JSON.parse_string(text)
 		if typeof(parsed) == TYPE_DICTIONARY:
-			return DotLightDocument.from_dictionary(parsed)
-		# DotLog, not push_warning: a content condition, not a programmer error, and it reaches server logs.
-		DotLog.warn(
+			return GSLightDocument.from_dictionary(parsed)
+		# GSLog, not push_warning: a content condition, not a programmer error, and it reaches server logs.
+		GSLog.warn(
 			CHANNEL,
 			"the lighting document would not parse; using the exported defaults",
 			{"path": document_path}
 		)
 
-	var doc := DotLightDocument.new()
+	var doc := GSLightDocument.new()
 	doc.has_sun = sun_enabled
 	doc.sun_pitch = sun_pitch
 	doc.sun_yaw = sun_yaw
