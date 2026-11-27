@@ -1,0 +1,13 @@
+# Runtime scripts checked by gs-ci scripts/check-gd-perf.py (tools/gd_perf_lint.py).
+# One fnmatch glob per line over tracked paths. Baseline: ci/efficiency/gd-perf.tsv.
+# bake/ is an offline editor/CLI step (scan, fingerprint, store lightmaps), never in a running game, so it is not listed.
+addons/gs_lighting/core/gs_light_document.gd
+addons/gs_lighting/core/gs_light_profile.gd
+addons/gs_lighting/gs_lighting_api.gd
+# runtime/gs_contact_shade.gd builds one static mesh at map load, never per frame, so it is not listed.
+addons/gs_lighting/runtime/gs_lamp_flicker.gd
+addons/gs_lighting/runtime/gs_light_rig.gd
+addons/gs_lighting/runtime/gs_light_zone.gd
+
+# Run once at map load or save (light documents, zone setup), not per frame:
+cold+: ^(from_.*|describe.*|specs|cvar_specs|_absorb_specs|set_cvar|follow_cvars|validate.*|presets|properties|standard_pair|restore|_restore_.*|to_config|parse_.*|_parse_.*|find_spot|to_dictionary|from_dictionary|document)$

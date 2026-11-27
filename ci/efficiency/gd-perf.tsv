@@ -1,0 +1,5 @@
+# gd-perf
+# Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add.
+addons/gs_lighting/core/gs_light_document.gd::_colour::untyped_array	1
+addons/gs_lighting/core/gs_light_document.gd::from_dictionary::untyped_array	3
+addons/gs_lighting/core/gs_light_document.gd::to_dictionary::untyped_array	3
