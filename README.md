@@ -2,7 +2,7 @@
 
 Lighting as data. A world's sun, ambient light, fog, sky and glow live in a dictionary that a map file, a downloaded pack, a server config or an editor can supply, and one call turns it into Godot nodes sized for the machine it runs on.
 
-Part of the [**GameSpice**](https://gamespice.net) collection: modular, MIT-licensed building blocks for games on the GameSpice platform (only the TMC website back end is closed). It was built with Claude Code and its headless suite passes, but little of it has met real players yet, so expect rough edges and please report what you find.
+This is a [GameSpice](https://gamespice.net) addon, MIT licensed and built with Claude Code. The headless suite is `examples/lighting_selftest.tscn`. Maps in the games of [Zee's Games](https://zeesgames.com) are lit by it on live servers and in browsers, so it has seen real players, not only the test scene.
 
 ## Install
 
@@ -104,6 +104,26 @@ A bake made from other geometry is refused with a warning and the live lights ar
 godot --headless --path . --import
 godot --headless --path . res://examples/lighting_selftest.tscn
 ```
+
+## Used by
+
+It is vendored in these games:
+
+- [Fatal Contact](https://zeesgames.com/fatal-contact)
+- [Airdrift](https://zeesgames.com/airdrift)
+- [Playlot](https://zeesgames.com/playlot)
+- [Buses From Hell](https://zeesgames.com/buses-from-hell)
+- [Smash Copter](https://zeesgames.com/smash-copter)
+- [Zombie Zone](https://zeesgames.com/zombie-zone)
+- [Hide n Seek](https://zeesgames.com/hide-n-seek)
+- [Prop Hunt](https://zeesgames.com/prop-hunt)
+- [Murder Mystery](https://zeesgames.com/murder-mystery)
+- [Deathrun](https://zeesgames.com/deathrun)
+- [Wipeout](https://zeesgames.com/wipeout)
+- [Dangerous Delivery](https://zeesgames.com/dangerous-delivery)
+- [Look At Me](https://zeesgames.com/look-at-me)
+
+The whole collection is at [zeesgames.com](https://zeesgames.com).
 
 ## Licence
 
